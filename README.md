@@ -1,2 +1,3 @@
 # ansible_install_services
-学习ansible
+Ansible 安装nginx及mariadb服务
+
