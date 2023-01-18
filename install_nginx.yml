@@ -1,0 +1,42 @@
+---
+- hosts: webserver
+  remote_user: root
+  gather_facts: yes
+  vars:
+    nginx_vhosts:
+      - listen: 80
+        server_name: "h5.shianskuaixian.com"
+        root: "/www/wwwroot/html"
+      - listen: 81
+        server_name: "pc.shiankuaixian.com"
+        root: "/www/wwwroot/html"
+      - listen: 82
+        server_name: "test.baidu.com"
+        root: "/www/wwwroot/html"
+
+  tasks:
+    - name: change hostname
+      hostname: name={{ name }}
+    - name: create nginx group
+      group: name=nginx gid=1005 state=present
+    - name: create nginx user
+      user: name=nginx uid=1005 group=nginx shell=/sbin/nologin home=/www/wwwroot/html create_home=no state=present
+    - name: mkdir directory
+      file: path=/www/wwwroot/html state=directory owner=nginx group=nginx
+    - name: install nginx server
+      yum: name=nginx state=present
+    - name: web page
+      copy: src=files/index.html dest=/www/wwwroot/html/
+      tags: data
+    - name: config file
+      template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
+      notify: restart
+      tags: conf
+    - name: start nginx 
+      service: name=nginx state=started enabled=yes
+
+
+  handlers:
+    - name: restart
+      service: name=nginx state=restarted
+   
