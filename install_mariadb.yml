@@ -1,0 +1,44 @@
+---
+- hosts: dbserver
+  remote_user: root
+  gather_facts: no
+  
+  tasks:
+    - name: create group
+      group: name=mysql gid=27 system=yes
+    - name: create user
+      user: name=mysql uid=27 system=yes group=mysql shell=/sbin/nologin home=/data/mysql create_home=no
+    - name: mkdir datadir
+      file: path=/data/mysql state=directory owner=mysql group=mysql
+    - name: link
+      file: src=/usr/local/mariadb-10.3.37-linux-x86_64 path=/usr/local/mysql state=link
+    - name: install databases
+      shell: chdir=/usr/local/mysql ./scripts/mysql_install_db --datadir=/data/mysql --user=mysql
+    - name: config file
+      copy: src=/data/ansible/files/my.cnf dest=/etc/ backup=yes
+      notify: restart mariadb
+      tags: restart service
+    - name: service scripts
+      shell: /bin/cp /usr/local/mysql/support-files/mysql.server /etc/init.d/mysqld
+    - name: replace mysql basedir
+      lineinfile:
+        path: /etc/init.d/mysqld 
+        regexp: '^basedir='
+        line: 'basedir=/usr/local/mysql'
+        state: present
+    - name: 
+      replace: path=/etc/init.d/mysqld regexp='datadir=' replace=datadir=/data/mysql backup=yes
+    - name: system service
+      copy: src=/data/ansible/files/mysql.service dest=/lib/systemd/system/
+    - name: systemctl daemon-reload
+      shell: systemctl daemon-reload
+    - name: start service
+      service: name=mysqld state=started enabled=yes
+    - name: PATH variable
+      copy: content='PATH=/usr/local/mysql/bin:$PATH' dest=/etc/profile.d/mysql.sh
+
+
+  handlers:
+    - name: restart mariadb
+      service: name=mysqld state=restarted
+
