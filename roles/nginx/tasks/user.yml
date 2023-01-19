@@ -1,2 +1,2 @@
 - name: create nginx user
-  user: name=nginx uid=32 system=yes state=present group=nginx shell=/sbin/nologin home=/var/www/html create_home=no
+  user: name=nginx uid=2000 system=yes state=present group=nginx shell=/sbin/nologin home=/var/www/html create_home=no

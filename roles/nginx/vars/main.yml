@@ -1,0 +1,7 @@
+nginx_vhosts:
+  - listen: 80
+    server_name: "test1.com"
+    root: "/var/www/html"
+  - listen: 81
+    server_name: "test2.com"
+    root: "/var/www/html"
