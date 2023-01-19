@@ -1,2 +1,2 @@
 - name: create nginx group
-  group: name=nginx state=present gid=2000
+  group: name=nginx state=present gid=756
